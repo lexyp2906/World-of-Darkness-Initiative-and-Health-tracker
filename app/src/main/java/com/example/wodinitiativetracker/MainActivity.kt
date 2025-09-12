@@ -1,78 +1,142 @@
 package com.example.wodinitiativetracker
 
-import android.R
+import android.app.AlertDialog
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.collection.intIntMapOf
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.wodinitiativetracker.ui.theme.WoDInitiativeTrackerTheme
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Button
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.window.Dialog
 
-class MainActivity : ComponentActivity() {
+
+open class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Greeting()
+            val viewModel: InsertViewModel by viewModels()
+            @Composable
+            fun CreatureDialog(onClose: () -> Unit, onConfirmation: () -> Unit) {
+                Dialog(onDismissRequest = onClose) {
+                    val creatureName = viewModel.creatureName.value
+                    val creatureHealth = viewModel.creatureHealth.value
+                    val creatureInitiative = viewModel.creatureInitiative.value
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(430.dp),
+                        shape = RoundedCornerShape(16.dp),
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp)
+                        ) {
+                            Text("Creature Name")
+                            OutlinedTextField(
+                                value = creatureName,
+                                onValueChange = {viewModel.onNameChanged(it)})
+                            Spacer(modifier = Modifier.padding(15.dp))
+                            Text("Creature Health (Optional)")
+                            OutlinedTextField(
+                                value = creatureHealth,
+                                onValueChange = { viewModel.onHealthChanged(it)})
+                            Spacer(modifier = Modifier.padding(15.dp))
+                            Text("Creature Initiative")
+                            OutlinedTextField(
+                                value = creatureInitiative,
+                                onValueChange = { viewModel.onInitiativeChanged(it)})
+                            Spacer(modifier = Modifier.padding(15.dp))
+                            Row {
+                                Button(
+                                    onClick = { onClose() },
+                                    modifier = Modifier.padding(12.dp),
+                                ) {
+                                    Text("Cancel")
+                                }
+                                Button(
+                                    onClick = { onConfirmation() },
+                                    modifier = Modifier.padding(12.dp),
+                                ) {
+                                    Text("Add Creature")
+                                }
+                            }
+
+                        }
+
+                    }
+                }
             }
-        }
-}
+            @Composable
+            //crea il bottone che inserisce le creature
+            fun AddCreatureButton(){
+                var showDialog = viewModel.showDialog.value
+                if (showDialog) {
+                    //chiude la finestra e resetta le caselle di testo
+                    CreatureDialog(onClose = { viewModel.DialogToggled(false);
+                        viewModel.onNameChanged("");
+                        viewModel.onHealthChanged("");
+                        viewModel.onInitiativeChanged("")},
+                        //conferma l'input
+                        onConfirmation = {viewModel.DialogToggled(false)})
+                }
+                Column {
+                    Button(
+                        onClick = {viewModel.DialogToggled(true)},
+                        modifier = Modifier.fillMaxWidth())
+                    {
+                        Text("Insert Creature")
+                    }
+                }
+            }
+            @Composable
+            fun Greeting() {
+                //box che contiene tutto
+                Box(modifier = Modifier.fillMaxSize()){
+                    //colonna di sotto col bottone
+                    Column(modifier = Modifier.align(Alignment.BottomCenter).padding(32.dp)){
+                        AddCreatureButton()
+                    }
+                    //colonna di sopra col titolo
+                    Column(modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .background(Color.LightGray)
+                        .fillMaxWidth()
+                        .padding(24.dp)){
+                        Text(text ="")
+                        Text(text = "World of Darkness Health and Initiative tracker")
+                    }
+                }
+            }
 
-@Composable
-//crea il bottone che inserisce le creature
-fun AddInitiativeButton(onIncrement:() -> Unit){
-    Column {
-        Button(
-            onClick = { onIncrement() },
-            modifier = Modifier.fillMaxWidth())
-        {
-            Text("Insert Creature")
+            Greeting()
         }
-    }
-}
 
-@Composable
-fun Greeting() {
-    var initiative by remember { mutableStateOf(0) }
-    //box che contiene tutto
-    Box(modifier = Modifier.fillMaxSize()){
-        //colonna di sotto col bottone
-        Column(modifier = Modifier.align(Alignment.BottomCenter).padding(32.dp)){
-            AddInitiativeButton({initiative++})
-        }
-        //colonna di sopra col titolo
-        Column(modifier = Modifier
-            .align(Alignment.TopCenter)
-            .background(Color.LightGray)
-            .fillMaxWidth()
-            .padding(24.dp)){
-            Text(text = "World of Darkness Health and Initiative tracker")
-            Text(text = "$initiative")
-        }
     }
 }
 
