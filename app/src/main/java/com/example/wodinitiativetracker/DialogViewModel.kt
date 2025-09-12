@@ -1,5 +1,6 @@
 package com.example.wodinitiativetracker
 
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 
@@ -15,10 +16,10 @@ class InsertViewModel : ViewModel() {
     }
     //queste funzioni aggiornano i valori nel viewmodel
     fun onHealthChanged(creatureHealth: String){
-        this.creatureHealth.value = creatureHealth
+        this.creatureHealth.value = creatureHealth.filter { it.isDigit() }
     }
     fun onInitiativeChanged(creatureInitiative: String){
-        this.creatureInitiative.value = creatureInitiative
+        this.creatureInitiative.value = creatureInitiative.filter { it.isDigit() }
     }
     fun DialogToggled(showDialog: Boolean){
         this.showDialog.value = showDialog
