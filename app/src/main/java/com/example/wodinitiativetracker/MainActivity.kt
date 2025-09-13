@@ -165,6 +165,7 @@ open class MainActivity : ComponentActivity() {
                                 health = viewModel.creatureHealth.value,
                                 initiative = viewModel.creatureInitiative.value
                             )
+                            viewModel.addedCreaturesList.add(newCreature)
                             viewModel.DialogToggled(false) }})}
 
 
@@ -199,10 +200,11 @@ open class MainActivity : ComponentActivity() {
                             .verticalScroll(scrollState)
                             .background(Color.White)
                             .statusBarsPadding()
-                            .fillMaxWidth(),){
+                            .fillMaxWidth()){
                             creatures.forEach{ creature ->
-                                Text(text = "${creature.name}", fontSize = 20.sp) //LAVORA QUI!!!!!
-                                //PENSO CHE LA LISTA DELLE CREATURE NON SI AGGIORNI QUANDO LE AGGIUNGI, ECCO PERCHè NON APPAIONO
+                                Text(text = "Name: ${creature.name}", fontSize = 20.sp)
+                                Text(text = "Health: ${creature.health}", fontSize = 20.sp)
+                                Text(text = "Initiative: ${creature.initiative}", fontSize = 20.sp)
                                 HorizontalDivider(thickness = 2.dp)
                             }
                         }
