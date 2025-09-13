@@ -1,8 +1,11 @@
 package com.example.wodinitiativetracker
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 
 class InsertViewModel : ViewModel() {
@@ -19,6 +22,8 @@ class InsertViewModel : ViewModel() {
     //val creatureNumber = mutableStateOf(0)
 
     val addedCreaturesList = mutableStateListOf<Creature>()
+
+
     fun showWarning(message: String){
         warning.value = message
         isWarningShown.value = true
