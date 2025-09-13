@@ -1,5 +1,7 @@
 package com.example.wodinitiativetracker
 
+import android.R.attr.text
+import android.R.attr.value
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -18,21 +21,31 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import kotlinx.coroutines.delay
 
 
 open class MainActivity : ComponentActivity() {
@@ -52,6 +65,7 @@ open class MainActivity : ComponentActivity() {
                     val creatureName = viewModel.creatureName.value
                     val creatureHealth = viewModel.creatureHealth.value
                     val creatureInitiative = viewModel.creatureInitiative.value
+                    val warning = viewModel.warning.value
                     //first we put all the dialog in a box so that with the imepadding it can go up
                     //when keyboard is shown, then we create the card where the textfields will be
                     //then we put all the textfields in a column
@@ -98,6 +112,17 @@ open class MainActivity : ComponentActivity() {
                                     value = creatureInitiative,
                                     onValueChange = { viewModel.onInitiativeChanged(it) })
                                 Spacer(modifier = Modifier.padding(15.dp))
+
+                                //the logic of the warning text.
+                                if (viewModel.isWarningShown.value && viewModel.warning.value.isNotEmpty()){
+                                    Text(warning, color = Color.Red)}
+                                if (viewModel.isWarningShown.value){
+                                    LaunchedEffect(key1 =viewModel.warningTrigger.value) {
+                                        delay(3000L)
+                                        viewModel.hideWarning()
+                                    }
+                                }
+
                                 Row {
                                     Button(
                                         onClick = { onClose() },
@@ -131,8 +156,18 @@ open class MainActivity : ComponentActivity() {
                         viewModel.onHealthChanged("");
                         viewModel.onInitiativeChanged("")},
                         //conferma l'input
-                        onConfirmation = {viewModel.DialogToggled(false)})
-                }
+                        onConfirmation = {if(viewModel.creatureName.value.isEmpty() or (viewModel.creatureInitiative.value.isEmpty())){
+                            viewModel.showWarning("cannot add a creature without name or initiative")}
+                        else{
+                            val newCreature = Creature(
+                                id = viewModel.addedCreaturesList.size,
+                                name = viewModel.creatureName.value,
+                                health = viewModel.creatureHealth.value,
+                                initiative = viewModel.creatureInitiative.value
+                            )
+                            viewModel.DialogToggled(false) }})}
+
+
                 Column {
                     Button(
                         onClick = {viewModel.DialogToggled(true)},
@@ -142,30 +177,50 @@ open class MainActivity : ComponentActivity() {
                     }
                 }
             }
+
             @Composable
-            fun Greeting() {
+            fun MainPage() {
+                val creatures = viewModel.addedCreaturesList
                 //box che contiene tutto
-                Box(modifier = Modifier.fillMaxSize()){
-                    //colonna di sotto col bottone
-                    Column(modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .navigationBarsPadding()
-                        .padding(32.dp)){
-                        AddCreatureButton()
-                    }
+                Box(modifier = Modifier.fillMaxSize()) {
                     //colonna di sopra col titolo
-                    Column(modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .background(Color.LightGray)
-                        .statusBarsPadding()
-                        .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally){
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .background(Color.LightGray)
+                            .statusBarsPadding()
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Text(text = "World of Darkness Health and Initiative tracker")
+                        //colonna che contiene la lista di creature inserite.
+                        var scrollState = rememberScrollState()
+                        Column (modifier = Modifier
+                            .verticalScroll(scrollState)
+                            .background(Color.White)
+                            .statusBarsPadding()
+                            .fillMaxWidth(),){
+                            creatures.forEach{ creature ->
+                                Text(text = "${creature.name}", fontSize = 20.sp) //LAVORA QUI!!!!!
+                                //PENSO CHE LA LISTA DELLE CREATURE NON SI AGGIORNI QUANDO LE AGGIUNGI, ECCO PERCHè NON APPAIONO
+                                HorizontalDivider(thickness = 2.dp)
+                            }
+                        }
+                    }
+                    //colonna di sotto col bottone
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .navigationBarsPadding()
+                            .padding(32.dp)
+                    ) {
+                        AddCreatureButton()
+
                     }
                 }
             }
 
-            Greeting()
+            MainPage()
         }
 
     }
