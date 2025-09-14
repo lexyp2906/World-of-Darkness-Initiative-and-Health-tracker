@@ -1,8 +1,6 @@
 package com.example.wodinitiativetracker
 
-import android.R.attr.thickness
 import android.os.Bundle
-import android.util.Log.i
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -199,17 +197,104 @@ open class MainActivity : ComponentActivity() {
                     //variabili per i cubi della vita
                     val updatedHealth = remember { mutableStateOf("") }
                     val healthCubes = StringBuilder(updatedHealth.value)
-                    //val shownDamage = viewModel.damageDealt.value.toInt()
-
-                    val bashingDamage = remember {mutableStateOf("")}
-                    val lethalDamage = remember {mutableStateOf("")}
-                    val aggrDamage = remember {mutableStateOf("")}
-
-                    val bashingCubes = StringBuilder(bashingDamage.value)
-                    val lethalCubes = StringBuilder (lethalDamage.value)
-                    val aggrCubes = StringBuilder(aggrDamage.value)
 
                     val numberMaxLength = 3
+
+                    fun increaseBashing(){
+                        if (healthCubes.isNotEmpty() and viewModel.damageDealt.value.isNotEmpty()) {
+                            if (!(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and !(healthCubes.toString().contains("☒"))){
+                                null
+                            }
+                            else if (!(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and (healthCubes.toString().contains("☒"))){
+                                healthCubes.replace(
+                                    healthCubes.toString().indexOf("☒"),
+                                    healthCubes.toString().indexOf("☒")+1,
+                                    "⧆")
+                                }
+
+                            else if (!(healthCubes.toString().contains("☐"))){
+                                healthCubes.replace(
+                                    healthCubes.toString().indexOf("◫"),
+                                    healthCubes.toString().indexOf("◫")+1,
+                                    "☒")
+                                }
+                            else if ((healthCubes.toString().contains("☐"))){
+                                healthCubes.replace(
+                                    healthCubes.toString().indexOf("☐"),
+                                    healthCubes.toString().indexOf("☐")+1,
+                                    "◫")
+                                }
+
+                            updatedHealth.value = healthCubes.toString()
+                        }
+                    }
+                    fun increaseLethal(){
+                        if (healthCubes.isNotEmpty() and viewModel.damageDealt.value.isNotEmpty()) {
+                            if (!(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and !(healthCubes.toString().contains("☒"))){
+                                null
+                            }
+                            else if (!(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and (healthCubes.toString().contains("☒"))){
+                                healthCubes.replace(
+                                    healthCubes.toString().indexOf("☒"),
+                                    healthCubes.toString().indexOf("☒")+1,
+                                    "⧆")
+                            }
+
+                            else if ((healthCubes.toString().contains("◫"))){
+                                healthCubes.replace(
+                                    healthCubes.toString().indexOf("◫"),
+                                    healthCubes.toString().indexOf("◫"),
+                                    "☒")
+                                healthCubes.setLength(creature.health.toInt())
+                            }
+                            else if ((healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫"))){
+                                healthCubes.replace(
+                                    healthCubes.toString().indexOf("☐"),
+                                    healthCubes.toString().indexOf("☐")+1,
+                                    "☒")
+                            }
+
+                            updatedHealth.value = healthCubes.toString()
+                        }
+                    }
+                    fun increaseAggr(){
+                        if (healthCubes.isNotEmpty() and viewModel.damageDealt.value.isNotEmpty()) {
+                            if (!(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and !(healthCubes.toString().contains("☒"))){
+                                null
+                            }
+                            else if (!(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and (healthCubes.toString().contains("☒"))){
+                                healthCubes.replace(
+                                    healthCubes.toString().indexOf("☒"),
+                                    healthCubes.toString().indexOf("☒")+1,
+                                    "⧆")
+                            }
+                            else if ((healthCubes.toString().contains("☒"))){
+                                healthCubes.replace(
+                                    healthCubes.toString().indexOf("☒"),
+                                    healthCubes.toString().indexOf("☒"),
+                                    "⧆")
+                                healthCubes.setLength(creature.health.toInt())
+                            }
+
+                            else if ((healthCubes.toString().contains("◫"))){
+                                healthCubes.replace(
+                                    healthCubes.toString().indexOf("◫"),
+                                    healthCubes.toString().indexOf("◫"),
+                                    "⧆")
+                                healthCubes.setLength(creature.health.toInt())
+                            }
+
+
+                            else if ((healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫"))){
+                                healthCubes.replace(
+                                    healthCubes.toString().indexOf("☐"),
+                                    healthCubes.toString().indexOf("☐")+1,
+                                    "⧆")
+                            }
+
+                            updatedHealth.value = healthCubes.toString()
+                        }
+                    }
 
                     Text(text = "Name: ${creature.name}", fontSize = 20.sp)
                     Text(text = "Initiative: ${creature.initiative}", fontSize = 20.sp)
@@ -243,92 +328,35 @@ open class MainActivity : ComponentActivity() {
                             modifier = Modifier.fillMaxWidth())
                         Row{
                             Button(onClick = {
-                                //SISTEMA QUA
-                                if (healthCubes.isNotEmpty() and viewModel.damageDealt.value.isNotEmpty()) {
-                                    for (i in 0 until viewModel.damageDealt.value.toInt()){
-                                        bashingCubes.append("◫")
-                                        lethalCubes.append("☒")
-                                        aggrCubes.append("⧆")
+                                val numberOfTimes = viewModel.damageDealt.value.toIntOrNull() ?: 0
+                                if (numberOfTimes > 0){
+                                    repeat(numberOfTimes){
+                                        increaseBashing()
                                     }
-                                    if (!(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and !(healthCubes.toString().contains("☒"))){
-                                        null
-                                    }
-                                    else if (bashingCubes.toString().length <= healthCubes.toString().length && !(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and (healthCubes.toString().contains("☒"))){
-                                        healthCubes.replace(
-                                            healthCubes.toString().indexOf("☒"),
-                                            viewModel.damageDealt.value.toInt() + healthCubes.toString().indexOf("☒"),
-                                            aggrCubes.toString())
-                                        healthCubes.setLength(creature.health.toInt())}
-
-                                    else if (bashingCubes.toString().length <= healthCubes.toString().length && !(healthCubes.toString().contains("☐"))){
-                                        healthCubes.replace(
-                                            healthCubes.toString().indexOf("◫"),
-                                            viewModel.damageDealt.value.toInt() + healthCubes.toString().indexOf("◫"),
-                                            lethalCubes.toString())
-                                        healthCubes.setLength(creature.health.toInt())}
-                                    else if (bashingCubes.toString().length <= healthCubes.toString().length && (healthCubes.toString().contains("☐"))){
-                                         healthCubes.replace(
-                                             healthCubes.toString().indexOf("☐"),
-                                             viewModel.damageDealt.value.toInt() + healthCubes.toString().indexOf("☐"),
-                                             bashingCubes.toString())
-                                        healthCubes.setLength(creature.health.toInt())}
-
-                                    //logica per quando il danno inserito è più alto del numeri di quadratini della vita.
-                                    // DA SISTEMARE!!!!!!
-//                                    else if (viewModel.damageDealt.value.toInt() > healthCubes.toString().length){
-//                                        bashingCubes.setLength(0)
-//                                        lethalCubes.setLength(0)
-//                                        aggrCubes.setLength(0)
-//                                        for (i in 0 until (viewModel.damageDealt.value.toInt() - healthCubes.toString().length)){
-//                                            bashingCubes.append("◫")
-//                                            lethalCubes.append("☒")
-//                                            aggrCubes.append("⧆")
-//                                        }
-//                                        if (!(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and (healthCubes.toString().contains("☒"))) {
-//                                            healthCubes.replace(
-//                                                healthCubes.toString().indexOf("☒"),
-//                                                healthCubes.toString().lastIndexOf("☒")-1,
-//                                                aggrCubes.toString()
-//                                            )
-//                                            healthCubes.setLength(creature.health.toInt())
-//                                        }
-//                                        else if (!(healthCubes.toString().contains("☐"))) {
-//                                            healthCubes.replace(
-//                                                healthCubes.toString().indexOf("◫"),
-//                                                healthCubes.toString().lastIndexOf("◫")-1,
-//                                                lethalCubes.toString()
-//                                            )
-//                                            healthCubes.setLength(creature.health.toInt())
-//                                        }
-//                                        else if ((healthCubes.toString().contains("☐"))) {
-//                                            healthCubes.replace(
-//                                                healthCubes.toString().indexOf("☐"),
-//                                                healthCubes.toString().lastIndexOf("☐")-1,
-//                                                bashingCubes.toString()
-//                                            )
-//                                            healthCubes.setLength(creature.health.toInt())
-//                                        }
-//                                    }
-
-                                    updatedHealth.value = healthCubes.toString()
-                                    viewModel.showDamageDealt("")
                                 }
-                            } ){
+                                viewModel.showDamageDealt("")
+                            } ) {
                                 Text("Bashing")
                             }
                             Button(onClick = {
-                                if (healthCubes.isNotEmpty()) {
-                                    healthCubes.replace(0, 1, "☒")
-                                    updatedHealth.value = healthCubes.toString()
-                                    viewModel.showDamageDealt("")}
+                                val numberOfTimes = viewModel.damageDealt.value.toIntOrNull() ?: 0
+                                if (numberOfTimes > 0){
+                                    repeat(numberOfTimes){
+                                        increaseLethal()
+                                    }
+                                }
+                                viewModel.showDamageDealt("")
                             } ){
                                 Text("Lethal")
                             }
                             Button(onClick = {
-                                if (healthCubes.isNotEmpty()) {
-                                    healthCubes.replace(0, 1, "⧆")
-                                    updatedHealth.value = healthCubes.toString()
-                                    viewModel.showDamageDealt("")}
+                                val numberOfTimes = viewModel.damageDealt.value.toIntOrNull() ?: 0
+                                if (numberOfTimes > 0){
+                                    repeat(numberOfTimes){
+                                        increaseAggr()
+                                    }
+                                }
+                                viewModel.showDamageDealt("")
                             } ){
                                 Text("Aggravated")
                             }
