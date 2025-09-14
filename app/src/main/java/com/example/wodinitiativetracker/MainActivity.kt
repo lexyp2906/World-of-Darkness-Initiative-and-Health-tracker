@@ -256,24 +256,29 @@ open class MainActivity : ComponentActivity() {
                                         healthCubes.replace(
                                             healthCubes.toString().indexOf("☒"),
                                             viewModel.damageDealt.value.toInt() + healthCubes.toString().indexOf("☒"),
-                                            aggrCubes.toString())}
+                                            aggrCubes.toString())
+                                        healthCubes.setLength(creature.health.toInt())}
+
                                     else if (bashingCubes.toString().length <= healthCubes.toString().length && !(healthCubes.toString().contains("☐"))){
                                         healthCubes.replace(
                                             healthCubes.toString().indexOf("◫"),
                                             viewModel.damageDealt.value.toInt() + healthCubes.toString().indexOf("◫"),
-                                            lethalCubes.toString())}
+                                            lethalCubes.toString())
+                                        healthCubes.setLength(creature.health.toInt())}
                                     else if (bashingCubes.toString().length <= healthCubes.toString().length && (healthCubes.toString().contains("☐"))){
                                          healthCubes.replace(
                                              healthCubes.toString().indexOf("☐"),
                                              viewModel.damageDealt.value.toInt() + healthCubes.toString().indexOf("☐"),
-                                             bashingCubes.toString())}
+                                             bashingCubes.toString())
+                                        healthCubes.setLength(creature.health.toInt())}
 
                                     //logica per quando il danno inserito è più alto del numeri di quadratini della vita.
                                     // DA SISTEMARE!!!!!!
-                                    else if (bashingCubes.toString().length > healthCubes.toString().length){
-                                        for (i in 0 until (bashingCubes.toString().length - healthCubes.toString().length)){
+                                    else if (viewModel.damageDealt.value.toInt() > healthCubes.toString().length){
+                                        for (i in 0 until (viewModel.damageDealt.value.toInt() - healthCubes.toString().length)){
                                             bashingCubes.append("◫")
                                             lethalCubes.append("☒")
+                                            aggrCubes.append("⧆")
                                         }
                                         if (!(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and (healthCubes.toString().contains("☒"))) {
                                             healthCubes.replace(
@@ -281,6 +286,7 @@ open class MainActivity : ComponentActivity() {
                                                 aggrCubes.length,
                                                 aggrCubes.toString()
                                             )
+                                            healthCubes.setLength(creature.health.toInt())
                                         }
                                         else if (!(healthCubes.toString().contains("☐"))) {
                                             healthCubes.replace(
@@ -288,6 +294,7 @@ open class MainActivity : ComponentActivity() {
                                                 lethalCubes.length,
                                                 lethalCubes.toString()
                                             )
+                                            healthCubes.setLength(creature.health.toInt())
                                         }
                                         else if ((healthCubes.toString().contains("☐"))) {
                                             healthCubes.replace(
@@ -295,6 +302,7 @@ open class MainActivity : ComponentActivity() {
                                                 bashingCubes.length,
                                                 bashingCubes.toString()
                                             )
+                                            healthCubes.setLength(creature.health.toInt())
                                         }
                                     }
 
