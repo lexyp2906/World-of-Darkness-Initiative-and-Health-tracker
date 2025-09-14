@@ -1,6 +1,8 @@
 package com.example.wodinitiativetracker
 
+import android.R.attr.text
 import android.os.Bundle
+import android.provider.SyncStateContract.Helpers.update
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -26,6 +28,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -41,6 +44,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
 open class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -202,20 +207,55 @@ open class MainActivity : ComponentActivity() {
                             .fillMaxWidth()){
                             //nome, iniziativa e salute
                             sortedItemsInDescendingOrder.forEach{ creature ->
+                                //variabili per i cubi della vita
+                                var updatedHealth by mutableStateOf("")
+                                var healthCubes = StringBuilder(updatedHealth)
+
                                 Text(text = "Name: ${creature.name}", fontSize = 20.sp)
+                                Text(text = "Initiative: ${creature.initiative}", fontSize = 20.sp)
                                 if (creature.health.isEmpty()){
                                     Text(text= "Health: ", fontSize = 20.sp)}
                                 else{
+                                    //determina quanti cubi di vita ci sono
                                     for (i in 0 until creature.health.toInt()){
                                         //☐
                                         //☒
                                         //◫
                                         //⧆
-                                        Text("☐")
+                                        healthCubes.append("☐")
+                                    }
+                                    val shownHealth = healthCubes.toString()
+                                    Text(text= "Health: $shownHealth", fontSize = 20.sp)
+                                    Text("Insert Damage")
+                                    TextField(
+                                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                        value = "2",
+                                        onValueChange = { "2"},
+                                        modifier = Modifier.fillMaxWidth())
+                                    Row{
+                                        //SISTEMA QUI CHE NON CI SI CAPISCE UN CAZZO. PERCHE' HEALTHCUBES NON S'AGGIORNA?
+                                        Button(onClick = {
+                                            if (healthCubes.isNotEmpty()) {
+                                                healthCubes.replace(0, 1, "◫") }
+                                        } ){
+                                            Text("Bashing")
+                                        }
+                                        Button(onClick = {
+                                            if (healthCubes.isNotEmpty()) {
+                                            healthCubes.replace(0, 1, "☒") }
+                                        } ){
+                                            Text("Lethal")
+                                        }
+                                        Button(onClick = {
+                                            if (healthCubes.isNotEmpty()) {
+                                            healthCubes.replace(0, 1, "⧆") }
+                                        } ){
+                                            Text("Aggravated")
+                                        }
                                     }
                                 }
-                                Text(text = "Initiative: ${creature.initiative}", fontSize = 20.sp)
-                                HorizontalDivider(thickness = 2.dp)
+
+                                HorizontalDivider(thickness = 6.dp)
 
                             }
                         }
