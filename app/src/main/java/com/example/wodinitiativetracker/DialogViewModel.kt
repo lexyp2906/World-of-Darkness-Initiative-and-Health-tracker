@@ -17,17 +17,21 @@ class InsertViewModel : ViewModel() {
     val creatureInitiative = mutableStateOf("")
     val warning = mutableStateOf("")
     val isWarningShown = mutableStateOf(false)
-    val warningTrigger = mutableStateOf(0)
+    val warningTrigger = mutableIntStateOf(0)
 
-    //val creatureNumber = mutableStateOf(0)
+    val damageDealt = mutableStateOf("")
+
 
     val addedCreaturesList = mutableStateListOf<Creature>()
 
 
+    fun showDamageDealt(damageDealt: String){
+        this.damageDealt.value = damageDealt.filter { it.isDigit() }
+    }
     fun showWarning(message: String){
         warning.value = message
         isWarningShown.value = true
-        warningTrigger.value++
+        warningTrigger.intValue++
     }
     fun hideWarning(){
         warning.value = ""
