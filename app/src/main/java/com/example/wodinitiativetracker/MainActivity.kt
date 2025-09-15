@@ -36,6 +36,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -172,7 +174,10 @@ open class MainActivity : ComponentActivity() {
                                 initiative = viewModel.creatureInitiative.value
                             )
                             viewModel.addedCreaturesList.add(newCreature)
-                            viewModel.DialogToggled(false) }})}
+                            viewModel.DialogToggled(false)
+                            viewModel.onNameChanged("")
+                            viewModel.onHealthChanged("")
+                            viewModel.onInitiativeChanged("")}})}
 
 
                 Column {
@@ -315,7 +320,6 @@ open class MainActivity : ComponentActivity() {
                         }
                         val shownHealth = healthCubes.toString()
                         Text(text= "Health: $shownHealth", fontSize = 20.sp)
-                        Text("Insert Damage")
                         TextField(
                             keyboardOptions = KeyboardOptions(
                                 imeAction = ImeAction.Done,
@@ -325,9 +329,12 @@ open class MainActivity : ComponentActivity() {
                                 if (it.length <= numberMaxLength){
                                     viewModel.showDamageDealt(it)}
                                             },
-                            modifier = Modifier.fillMaxWidth())
+                            modifier = Modifier.fillMaxWidth().padding(4.dp),
+                            placeholder = {Text("insert damage")})
                         Row{
-                            Button(onClick = {
+                            Button(
+                                modifier = Modifier.padding(10.dp),
+                                onClick = {
                                 val numberOfTimes = viewModel.damageDealt.value.toIntOrNull() ?: 0
                                 if (numberOfTimes > 0){
                                     repeat(numberOfTimes){
@@ -338,7 +345,9 @@ open class MainActivity : ComponentActivity() {
                             } ) {
                                 Text("Bashing")
                             }
-                            Button(onClick = {
+                            Button(
+                                modifier = Modifier.padding(10.dp),
+                                onClick = {
                                 val numberOfTimes = viewModel.damageDealt.value.toIntOrNull() ?: 0
                                 if (numberOfTimes > 0){
                                     repeat(numberOfTimes){
@@ -349,7 +358,9 @@ open class MainActivity : ComponentActivity() {
                             } ){
                                 Text("Lethal")
                             }
-                            Button(onClick = {
+                            Button(
+                                modifier = Modifier.padding(10.dp),
+                                onClick = {
                                 val numberOfTimes = viewModel.damageDealt.value.toIntOrNull() ?: 0
                                 if (numberOfTimes > 0){
                                     repeat(numberOfTimes){
@@ -381,7 +392,9 @@ open class MainActivity : ComponentActivity() {
                             .fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = "World of Darkness Health and Initiative tracker")
+                        Text(text = "World of Darkness Health and Initiative tracker",
+                            fontWeight = FontWeight.Bold,
+                            fontStyle = FontStyle.Italic)
                         //colonna che contiene la lista di creature inserite.
                         var scrollState = rememberScrollState()
                         Column (modifier = Modifier
