@@ -36,6 +36,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -50,6 +52,10 @@ open class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        if (!isTaskRoot) {
+            finish()
+            return
+        }
         setContent {
             val viewModel: InsertViewModel by viewModels()
             @Composable
@@ -134,13 +140,13 @@ open class MainActivity : ComponentActivity() {
                                 Row {
                                     Button(
                                         onClick = { onClose() },
-                                        modifier = Modifier.padding(36.dp),
+                                        modifier = Modifier.padding(12.dp),
                                     ) {
                                         Text("Cancel")
                                     }
                                     Button(
                                         onClick = { onConfirmation() },
-                                        modifier = Modifier.padding(36.dp),
+                                        modifier = Modifier.padding(12.dp),
                                     ) {
                                         Text("Add Creature")
                                     }
@@ -300,7 +306,8 @@ open class MainActivity : ComponentActivity() {
                             updatedHealth.value = healthCubes.toString()
                         }
                     }
-
+                    val keyboardController = LocalSoftwareKeyboardController.current
+                    val focusManager = LocalFocusManager.current
                     Text(text = "Name: ${creature.name}", fontSize = 20.sp)
                     Text(text = "Initiative: ${creature.initiative}", fontSize = 20.sp)
                     if (creature.health.isEmpty()){
@@ -333,7 +340,7 @@ open class MainActivity : ComponentActivity() {
                             placeholder = {Text("insert damage")})
                         Row{
                             Button(
-                                modifier = Modifier.padding(10.dp),
+                                modifier = Modifier.padding(8.dp),
                                 onClick = {
                                 val numberOfTimes = viewModel.damageDealt.value.toIntOrNull() ?: 0
                                 if (numberOfTimes > 0){
@@ -341,12 +348,15 @@ open class MainActivity : ComponentActivity() {
                                         increaseBashing()
                                     }
                                 }
-                                viewModel.showDamageDealt("")
+                                    viewModel.showDamageDealt("")
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
+
                             } ) {
                                 Text("Bashing")
                             }
                             Button(
-                                modifier = Modifier.padding(10.dp),
+                                modifier = Modifier.padding(8.dp),
                                 onClick = {
                                 val numberOfTimes = viewModel.damageDealt.value.toIntOrNull() ?: 0
                                 if (numberOfTimes > 0){
@@ -354,12 +364,14 @@ open class MainActivity : ComponentActivity() {
                                         increaseLethal()
                                     }
                                 }
-                                viewModel.showDamageDealt("")
+                                    viewModel.showDamageDealt("")
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
                             } ){
                                 Text("Lethal")
                             }
                             Button(
-                                modifier = Modifier.padding(10.dp),
+                                modifier = Modifier.padding(8.dp),
                                 onClick = {
                                 val numberOfTimes = viewModel.damageDealt.value.toIntOrNull() ?: 0
                                 if (numberOfTimes > 0){
@@ -367,7 +379,9 @@ open class MainActivity : ComponentActivity() {
                                         increaseAggr()
                                     }
                                 }
-                                viewModel.showDamageDealt("")
+                                    viewModel.showDamageDealt("")
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
                             } ){
                                 Text("Aggravated")
                             }
@@ -395,27 +409,19 @@ open class MainActivity : ComponentActivity() {
                         Text(text = "World of Darkness Health and Initiative tracker",
                             fontWeight = FontWeight.Bold,
                             fontStyle = FontStyle.Italic)
+                        AddCreatureButton()
                         //colonna che contiene la lista di creature inserite.
                         var scrollState = rememberScrollState()
                         Column (modifier = Modifier
                             .verticalScroll(scrollState)
                             .background(Color.White)
                             .statusBarsPadding()
+                            .navigationBarsPadding()
                             .fillMaxWidth()){
                             //nome, iniziativa e salute
                             damageDealing()
 
                         }
-                    }
-                    //colonna di sotto col bottone
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .navigationBarsPadding()
-                            .padding(32.dp)
-                    ) {
-                        AddCreatureButton()
-
                     }
                 }
 
