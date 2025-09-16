@@ -18,10 +18,9 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
@@ -34,6 +33,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
-import androidx.compose.foundation.lazy.items
+import java.util.UUID
 
 open class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,6 +60,7 @@ open class MainActivity : ComponentActivity() {
         }
         setContent {
             val viewModel: InsertViewModel by viewModels()
+
             @Composable
             fun CreatureDialog(onClose: () -> Unit, onConfirmation: () -> Unit) {
                 Dialog(
@@ -67,7 +68,8 @@ open class MainActivity : ComponentActivity() {
                     properties = DialogProperties(
                         usePlatformDefaultWidth = false,
                         decorFitsSystemWindows = false
-                    )) {
+                    )
+                ) {
                     val creatureName = viewModel.creatureName.value
                     val creatureHealth = viewModel.creatureHealth.value
                     val creatureInitiative = viewModel.creatureInitiative.value
@@ -77,11 +79,13 @@ open class MainActivity : ComponentActivity() {
                     //first we put all the dialog in a box so that with the imepadding it can go up
                     //when keyboard is shown, then we create the card where the textfields will be
                     //then we put all the textfields in a column
-                    Box(modifier = Modifier
-                        .fillMaxSize()
-                        .imePadding()
-                        .padding(12.dp),
-                        contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .imePadding()
+                            .padding(12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -97,10 +101,13 @@ open class MainActivity : ComponentActivity() {
                                 OutlinedTextField(
                                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                                     value = creatureName,
-                                    onValueChange = {it ->
-                                        if(it.length <= textMaxLength){
-                                            viewModel.onNameChanged(it)}},
-                                    modifier = Modifier.fillMaxWidth())
+                                    onValueChange = { it ->
+                                        if (it.length <= textMaxLength) {
+                                            viewModel.onNameChanged(it)
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
                                 Spacer(modifier = Modifier.padding(15.dp))
                                 Text("Creature Health (Optional)")
                                 OutlinedTextField(
@@ -110,9 +117,10 @@ open class MainActivity : ComponentActivity() {
                                     ),
                                     modifier = Modifier.fillMaxWidth(),
                                     value = creatureHealth,
-                                    onValueChange = {it ->
-                                        if(it.length <= numberMaxLength){
-                                            viewModel.onHealthChanged(it) }
+                                    onValueChange = { it ->
+                                        if (it.length <= numberMaxLength) {
+                                            viewModel.onHealthChanged(it)
+                                        }
                                     })
                                 Spacer(modifier = Modifier.padding(15.dp))
                                 Text("Creature Initiative")
@@ -123,17 +131,19 @@ open class MainActivity : ComponentActivity() {
                                     ),
                                     modifier = Modifier.fillMaxWidth(),
                                     value = creatureInitiative,
-                                    onValueChange = {it ->
-                                        if (it.length <= numberMaxLength){
-                                            viewModel.onInitiativeChanged(it) }
+                                    onValueChange = { it ->
+                                        if (it.length <= numberMaxLength) {
+                                            viewModel.onInitiativeChanged(it)
+                                        }
                                     })
                                 Spacer(modifier = Modifier.padding(15.dp))
 
                                 //the logic of the warning text.
-                                if (viewModel.isWarningShown.value && viewModel.warning.value.isNotEmpty()){
-                                    Text(warning, color = Color.Red)}
-                                if (viewModel.isWarningShown.value){
-                                    LaunchedEffect(key1 =viewModel.warningTrigger.intValue) {
+                                if (viewModel.isWarningShown.value && viewModel.warning.value.isNotEmpty()) {
+                                    Text(warning, color = Color.Red)
+                                }
+                                if (viewModel.isWarningShown.value) {
+                                    LaunchedEffect(key1 = viewModel.warningTrigger.intValue) {
                                         delay(3000L)
                                         viewModel.hideWarning()
                                     }
@@ -160,39 +170,48 @@ open class MainActivity : ComponentActivity() {
                     }
                 }
             }
+
             @Composable
             //crea il bottone che inserisce le creature
-            fun AddCreatureButton(){
+            fun AddCreatureButton() {
                 val showDialog = viewModel.showDialog.value
                 if (showDialog) {
                     //Crea la finestra per inserire le creature, poi da opzione per
                     // chiudere la finestra e resettare le caselle di testo, o per confermare e aggiungere la creatura.
-                    CreatureDialog(onClose = { viewModel.DialogToggled(false)
-                        viewModel.onNameChanged("")
-                        viewModel.onHealthChanged("")
-                        viewModel.onInitiativeChanged("")},
-                        //conferma l'input
-                        onConfirmation = {if(viewModel.creatureName.value.isEmpty() or (viewModel.creatureInitiative.value.isEmpty())){
-                            viewModel.showWarning("cannot add a creature without name or initiative")}
-                        else{
-                            val newCreature = Creature(
-                                id = viewModel.addedCreaturesList.size,
-                                name = viewModel.creatureName.value,
-                                health = viewModel.creatureHealth.value,
-                                initiative = viewModel.creatureInitiative.value,
-                                currentHealth = viewModel.creatureHealth.value
-                            )
-                            viewModel.addedCreaturesList.add(newCreature)
+                    CreatureDialog(
+                        onClose = {
                             viewModel.DialogToggled(false)
                             viewModel.onNameChanged("")
                             viewModel.onHealthChanged("")
-                            viewModel.onInitiativeChanged("")}})}
+                            viewModel.onInitiativeChanged("")
+                        },
+                        //conferma l'input
+                        onConfirmation = {
+                            if (viewModel.creatureName.value.isEmpty() or (viewModel.creatureInitiative.value.isEmpty())) {
+                                viewModel.showWarning("cannot add a creature without name or initiative")
+                            } else {
+                                val newCreature = Creature(
+                                    id = UUID.randomUUID(),
+                                    name = viewModel.creatureName.value,
+                                    health = viewModel.creatureHealth.value,
+                                    initiative = viewModel.creatureInitiative.value,
+                                    currentHealth = viewModel.creatureHealth.value
+                                )
+                                viewModel.addedCreaturesList.add(newCreature)
+                                viewModel.DialogToggled(false)
+                                viewModel.onNameChanged("")
+                                viewModel.onHealthChanged("")
+                                viewModel.onInitiativeChanged("")
+                            }
+                        })
+                }
 
 
                 Column {
                     Button(
-                        onClick = {viewModel.DialogToggled(true)},
-                        modifier = Modifier.fillMaxWidth())
+                        onClick = { viewModel.DialogToggled(true) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     {
                         Text("Insert Creature")
                     }
@@ -200,12 +219,13 @@ open class MainActivity : ComponentActivity() {
             }
 
             @Composable
-            fun creaturesColumn () {
+            fun creaturesColumn() {
                 val sortedItemsInDescendingOrder by remember(viewModel.addedCreaturesList) {
                     derivedStateOf {
                         viewModel.addedCreaturesList.sortedByDescending { creature -> creature.initiative.toInt() }
                     }
                 }
+
                 LazyColumn(
                     modifier = Modifier
                         .background(Color.White)
@@ -215,12 +235,11 @@ open class MainActivity : ComponentActivity() {
                 ) {
                     items(
                         items = sortedItemsInDescendingOrder,
-                        key = {creature -> creature.id}
+                        key = { creature -> creature.id }
                     ) { creature ->
                         //variabili per i cubi della vita
-                        val updatedHealth = remember { mutableStateOf("") }
+                        val updatedHealth = rememberSaveable { mutableStateOf("") }
                         val healthCubes = StringBuilder(updatedHealth.value)
-
 
                         val numberMaxLength = 3
 
@@ -240,25 +259,25 @@ open class MainActivity : ComponentActivity() {
                                         healthCubes.toString().indexOf("☒") + 1,
                                         "⧆"
                                     )
-                                    creature.currentHealth = healthCubes.toString()
+
                                 } else if (!(healthCubes.toString().contains("☐"))) {
                                     healthCubes.replace(
                                         healthCubes.toString().indexOf("◫"),
                                         healthCubes.toString().indexOf("◫") + 1,
                                         "☒"
                                     )
-                                    creature.currentHealth = healthCubes.toString()
+
                                 } else if ((healthCubes.toString().contains("☐"))) {
                                     healthCubes.replace(
                                         healthCubes.toString().indexOf("☐"),
                                         healthCubes.toString().indexOf("☐") + 1,
                                         "◫"
                                     )
-                                    creature.currentHealth = healthCubes.toString()
+
                                 }
 
                                 updatedHealth.value = healthCubes.toString()
-                                creature.currentHealth = healthCubes.toString()
+                                creature.currentHealth = updatedHealth.value
                             }
                         }
 
@@ -279,9 +298,7 @@ open class MainActivity : ComponentActivity() {
                                         "⧆"
                                     )
                                     healthCubes.setLength(creature.health.toInt())
-                                    creature.currentHealth = healthCubes.toString()
                                 }
-//
                                 else if ((healthCubes.toString().contains("◫"))) {
                                     healthCubes.replace(
                                         healthCubes.toString().indexOf("◫"),
@@ -289,7 +306,7 @@ open class MainActivity : ComponentActivity() {
                                         "☒"
                                     )
                                     healthCubes.setLength(creature.health.toInt())
-                                    creature.currentHealth = healthCubes.toString()
+
                                 } else if ((healthCubes.toString()
                                         .contains("☐")) and !(healthCubes.toString().contains("◫"))
                                 ) {
@@ -300,7 +317,8 @@ open class MainActivity : ComponentActivity() {
                                     )
                                 }
                                 updatedHealth.value = healthCubes.toString()
-                                creature.currentHealth = healthCubes.toString()
+                                creature.currentHealth = updatedHealth.value
+
                             }
                         }
 
@@ -320,7 +338,6 @@ open class MainActivity : ComponentActivity() {
                                         healthCubes.toString().indexOf("☒") + 1,
                                         "⧆"
                                     )
-                                    creature.currentHealth = healthCubes.toString()
                                 } else if ((healthCubes.toString().contains("☒"))) {
                                     healthCubes.replace(
                                         healthCubes.toString().indexOf("☒"),
@@ -328,7 +345,7 @@ open class MainActivity : ComponentActivity() {
                                         "⧆"
                                     )
                                     healthCubes.setLength(creature.health.toInt())
-                                    creature.currentHealth = healthCubes.toString()
+
                                 } else if ((healthCubes.toString().contains("◫"))) {
                                     healthCubes.replace(
                                         healthCubes.toString().indexOf("◫"),
@@ -336,7 +353,7 @@ open class MainActivity : ComponentActivity() {
                                         "⧆"
                                     )
                                     healthCubes.setLength(creature.health.toInt())
-                                    creature.currentHealth = healthCubes.toString()
+
                                 } else if ((healthCubes.toString()
                                         .contains("☐")) and !(healthCubes.toString().contains("◫"))
                                 ) {
@@ -345,22 +362,25 @@ open class MainActivity : ComponentActivity() {
                                         healthCubes.toString().indexOf("☐") + 1,
                                         "⧆"
                                     )
-                                    creature.currentHealth = healthCubes.toString()
+
                                 }
 
                                 updatedHealth.value = healthCubes.toString()
-                                creature.currentHealth = healthCubes.toString()
+                                creature.currentHealth = updatedHealth.value
                             }
                         }
+
                         val keyboardController = LocalSoftwareKeyboardController.current
                         val focusManager = LocalFocusManager.current
-                        Box(modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.CenterEnd){
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
                             Button(
                                 modifier = Modifier.padding(8.dp),
                                 onClick = {
                                     viewModel.addedCreaturesList.remove(creature)
-                                    }) {
+                                }) {
                                 Text("Delete creature")
                             }
                         }
@@ -378,12 +398,15 @@ open class MainActivity : ComponentActivity() {
                                     //◫
                                     //⧆
                                     healthCubes.append("☐")
-
                                 }
-
                             }
-                            val shownHealth = creature.currentHealth
-                            Text(text = "Health: $shownHealth", fontSize = 20.sp)
+                            val wasHealthButtonPressed = rememberSaveable {mutableStateOf(false)}
+                            if (wasHealthButtonPressed.value){
+                                Text(text = "Health: ${creature.currentHealth}", fontSize = 20.sp)
+                            }
+                            else{
+                                Text(text = "Health: $healthCubes", fontSize = 20.sp)
+                            }
                             TextField(
                                 keyboardOptions = KeyboardOptions(
                                     imeAction = ImeAction.Done,
@@ -395,7 +418,9 @@ open class MainActivity : ComponentActivity() {
                                         viewModel.showDamageDealt(it)
                                     }
                                 },
-                                modifier = Modifier.fillMaxWidth().padding(4.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(4.dp),
                                 placeholder = { Text("insert damage") })
                             Row {
                                 Button(
@@ -406,6 +431,7 @@ open class MainActivity : ComponentActivity() {
                                         if (numberOfTimes > 0) {
                                             repeat(numberOfTimes) {
                                                 increaseBashing()
+                                                wasHealthButtonPressed.value = true
                                             }
                                         }
                                         viewModel.showDamageDealt("")
@@ -423,6 +449,7 @@ open class MainActivity : ComponentActivity() {
                                         if (numberOfTimes > 0) {
                                             repeat(numberOfTimes) {
                                                 increaseLethal()
+                                                wasHealthButtonPressed.value = true
                                             }
                                         }
                                         viewModel.showDamageDealt("")
@@ -439,6 +466,7 @@ open class MainActivity : ComponentActivity() {
                                         if (numberOfTimes > 0) {
                                             repeat(numberOfTimes) {
                                                 increaseAggr()
+                                                wasHealthButtonPressed.value = true
                                             }
                                         }
                                         viewModel.showDamageDealt("")
@@ -469,9 +497,11 @@ open class MainActivity : ComponentActivity() {
                             .fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = "World of Darkness Health and Initiative tracker",
+                        Text(
+                            text = "World of Darkness Health and Initiative tracker",
                             fontWeight = FontWeight.Bold,
-                            fontStyle = FontStyle.Italic)
+                            fontStyle = FontStyle.Italic
+                        )
                         AddCreatureButton()
                         //colonna che contiene la lista di creature inserite.
                         creaturesColumn()
