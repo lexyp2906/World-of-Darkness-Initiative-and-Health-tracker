@@ -24,7 +24,6 @@ class InsertViewModel : ViewModel() {
 
     val addedCreaturesList = mutableStateListOf<Creature>()
 
-
     fun showDamageDealt(damageDealt: String){
         this.damageDealt.value = damageDealt.filter { it.isDigit() }
     }

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
+import androidx.compose.foundation.lazy.items
 
 open class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -197,199 +199,245 @@ open class MainActivity : ComponentActivity() {
             }
 
             @Composable
-            fun damageDealing (){
-                //logica che ordina le creature in base all'iniziativa
-                val sortedItemsInDescendingOrder by remember(viewModel.addedCreaturesList){
+            fun creaturesColumn () {
+                val sortedItemsInDescendingOrder by remember(viewModel.addedCreaturesList) {
                     derivedStateOf {
                         viewModel.addedCreaturesList.sortedByDescending { creature -> creature.initiative.toInt() }
                     }
                 }
-                sortedItemsInDescendingOrder.forEach{ creature ->
-                    //variabili per i cubi della vita
-                    val updatedHealth = remember { mutableStateOf("") }
-                    val healthCubes = StringBuilder(updatedHealth.value)
+                LazyColumn(
+                    modifier = Modifier
+                        .background(Color.White)
+                        .statusBarsPadding()
+                        .navigationBarsPadding()
+                        .fillMaxWidth()
+                ) {
+                    items(
+                        items = sortedItemsInDescendingOrder,
+                        key = {creature -> creature.id}
+                    ) { creature ->
+                        //variabili per i cubi della vita
+                        val updatedHealth = remember { mutableStateOf("") }
+                        val healthCubes = StringBuilder(updatedHealth.value)
 
-                    val numberMaxLength = 3
+                        val numberMaxLength = 3
 
-                    fun increaseBashing(){
-                        if (healthCubes.isNotEmpty() and viewModel.damageDealt.value.isNotEmpty()) {
-                            if (!(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and !(healthCubes.toString().contains("☒"))){
-                                null
-                            }
-                            else if (!(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and (healthCubes.toString().contains("☒"))){
-                                healthCubes.replace(
-                                    healthCubes.toString().indexOf("☒"),
-                                    healthCubes.toString().indexOf("☒")+1,
-                                    "⧆")
+                        fun increaseBashing() {
+                            if (healthCubes.isNotEmpty() and viewModel.damageDealt.value.isNotEmpty()) {
+                                if (!(healthCubes.toString()
+                                        .contains("☐")) and !(healthCubes.toString()
+                                        .contains("◫")) and !(healthCubes.toString().contains("☒"))
+                                ) {
+                                    null
+                                } else if (!(healthCubes.toString()
+                                        .contains("☐")) and !(healthCubes.toString()
+                                        .contains("◫")) and (healthCubes.toString().contains("☒"))
+                                ) {
+                                    healthCubes.replace(
+                                        healthCubes.toString().indexOf("☒"),
+                                        healthCubes.toString().indexOf("☒") + 1,
+                                        "⧆"
+                                    )
+                                } else if (!(healthCubes.toString().contains("☐"))) {
+                                    healthCubes.replace(
+                                        healthCubes.toString().indexOf("◫"),
+                                        healthCubes.toString().indexOf("◫") + 1,
+                                        "☒"
+                                    )
+                                } else if ((healthCubes.toString().contains("☐"))) {
+                                    healthCubes.replace(
+                                        healthCubes.toString().indexOf("☐"),
+                                        healthCubes.toString().indexOf("☐") + 1,
+                                        "◫"
+                                    )
                                 }
 
-                            else if (!(healthCubes.toString().contains("☐"))){
-                                healthCubes.replace(
-                                    healthCubes.toString().indexOf("◫"),
-                                    healthCubes.toString().indexOf("◫")+1,
-                                    "☒")
+                                updatedHealth.value = healthCubes.toString()
+                            }
+                        }
+
+                        fun increaseLethal() {
+                            if (healthCubes.isNotEmpty() and viewModel.damageDealt.value.isNotEmpty()) {
+                                if (!(healthCubes.toString()
+                                        .contains("☐")) and !(healthCubes.toString()
+                                        .contains("◫")) and !(healthCubes.toString().contains("☒"))
+                                ) {
+                                    null
+                                } else if (!(healthCubes.toString()
+                                        .contains("☐")) and !(healthCubes.toString()
+                                        .contains("◫")) and (healthCubes.toString().contains("☒"))
+                                ) {
+                                    healthCubes.replace(
+                                        healthCubes.toString().indexOf("☒"),
+                                        healthCubes.toString().indexOf("☒") + 1,
+                                        "⧆"
+                                    )
+                                    healthCubes.setLength(creature.health.toInt())
                                 }
-                            else if ((healthCubes.toString().contains("☐"))){
-                                healthCubes.replace(
-                                    healthCubes.toString().indexOf("☐"),
-                                    healthCubes.toString().indexOf("☐")+1,
-                                    "◫")
+//
+                                else if ((healthCubes.toString().contains("◫"))) {
+                                    healthCubes.replace(
+                                        healthCubes.toString().indexOf("◫"),
+                                        healthCubes.toString().indexOf("◫"),
+                                        "☒"
+                                    )
+                                    healthCubes.setLength(creature.health.toInt())
+                                } else if ((healthCubes.toString()
+                                        .contains("☐")) and !(healthCubes.toString().contains("◫"))
+                                ) {
+                                    healthCubes.replace(
+                                        healthCubes.toString().indexOf("☐"),
+                                        healthCubes.toString().indexOf("☐") + 1,
+                                        "☒"
+                                    )
+                                }
+                                updatedHealth.value = healthCubes.toString()
+                            }
+                        }
+
+                        fun increaseAggr() {
+                            if (healthCubes.isNotEmpty() and viewModel.damageDealt.value.isNotEmpty()) {
+                                if (!(healthCubes.toString()
+                                        .contains("☐")) and !(healthCubes.toString()
+                                        .contains("◫")) and !(healthCubes.toString().contains("☒"))
+                                ) {
+                                    null
+                                } else if (!(healthCubes.toString()
+                                        .contains("☐")) and !(healthCubes.toString()
+                                        .contains("◫")) and (healthCubes.toString().contains("☒"))
+                                ) {
+                                    healthCubes.replace(
+                                        healthCubes.toString().indexOf("☒"),
+                                        healthCubes.toString().indexOf("☒") + 1,
+                                        "⧆"
+                                    )
+                                } else if ((healthCubes.toString().contains("☒"))) {
+                                    healthCubes.replace(
+                                        healthCubes.toString().indexOf("☒"),
+                                        healthCubes.toString().indexOf("☒"),
+                                        "⧆"
+                                    )
+                                    healthCubes.setLength(creature.health.toInt())
+                                } else if ((healthCubes.toString().contains("◫"))) {
+                                    healthCubes.replace(
+                                        healthCubes.toString().indexOf("◫"),
+                                        healthCubes.toString().indexOf("◫"),
+                                        "⧆"
+                                    )
+                                    healthCubes.setLength(creature.health.toInt())
+                                } else if ((healthCubes.toString()
+                                        .contains("☐")) and !(healthCubes.toString().contains("◫"))
+                                ) {
+                                    healthCubes.replace(
+                                        healthCubes.toString().indexOf("☐"),
+                                        healthCubes.toString().indexOf("☐") + 1,
+                                        "⧆"
+                                    )
                                 }
 
-                            updatedHealth.value = healthCubes.toString()
+                                updatedHealth.value = healthCubes.toString()
+                            }
                         }
-                    }
-                    fun increaseLethal(){
-                        if (healthCubes.isNotEmpty() and viewModel.damageDealt.value.isNotEmpty()) {
-                            if (!(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and !(healthCubes.toString().contains("☒"))){
-                                null
-                            }
-                            else if (!(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and (healthCubes.toString().contains("☒"))){
-                                healthCubes.replace(
-                                    healthCubes.toString().indexOf("☒"),
-                                    healthCubes.toString().indexOf("☒")+1,
-                                    "⧆")
-                            }
-
-                            else if ((healthCubes.toString().contains("◫"))){
-                                healthCubes.replace(
-                                    healthCubes.toString().indexOf("◫"),
-                                    healthCubes.toString().indexOf("◫"),
-                                    "☒")
-                                healthCubes.setLength(creature.health.toInt())
-                            }
-                            else if ((healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫"))){
-                                healthCubes.replace(
-                                    healthCubes.toString().indexOf("☐"),
-                                    healthCubes.toString().indexOf("☐")+1,
-                                    "☒")
-                            }
-
-                            updatedHealth.value = healthCubes.toString()
-                        }
-                    }
-                    fun increaseAggr(){
-                        if (healthCubes.isNotEmpty() and viewModel.damageDealt.value.isNotEmpty()) {
-                            if (!(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and !(healthCubes.toString().contains("☒"))){
-                                null
-                            }
-                            else if (!(healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫")) and (healthCubes.toString().contains("☒"))){
-                                healthCubes.replace(
-                                    healthCubes.toString().indexOf("☒"),
-                                    healthCubes.toString().indexOf("☒")+1,
-                                    "⧆")
-                            }
-                            else if ((healthCubes.toString().contains("☒"))){
-                                healthCubes.replace(
-                                    healthCubes.toString().indexOf("☒"),
-                                    healthCubes.toString().indexOf("☒"),
-                                    "⧆")
-                                healthCubes.setLength(creature.health.toInt())
-                            }
-
-                            else if ((healthCubes.toString().contains("◫"))){
-                                healthCubes.replace(
-                                    healthCubes.toString().indexOf("◫"),
-                                    healthCubes.toString().indexOf("◫"),
-                                    "⧆")
-                                healthCubes.setLength(creature.health.toInt())
-                            }
-
-
-                            else if ((healthCubes.toString().contains("☐")) and !(healthCubes.toString().contains("◫"))){
-                                healthCubes.replace(
-                                    healthCubes.toString().indexOf("☐"),
-                                    healthCubes.toString().indexOf("☐")+1,
-                                    "⧆")
-                            }
-
-                            updatedHealth.value = healthCubes.toString()
-                        }
-                    }
-                    val keyboardController = LocalSoftwareKeyboardController.current
-                    val focusManager = LocalFocusManager.current
-                    Text(text = "Name: ${creature.name}", fontSize = 20.sp)
-                    Text(text = "Initiative: ${creature.initiative}", fontSize = 20.sp)
-                    if (creature.health.isEmpty()){
-                        Text(text= "Health: ", fontSize = 20.sp)}
-                    else{
-                        //impedisce al for loop di ripetersi ogni volta che premi un bottone
-                        if (healthCubes.toString() == ""){
-                            //determina quanti cubi di vita ci sono
-                            for (i in 0 until creature.health.toInt()) {
-                                //☐
-                                //☒
-                                //◫
-                                //⧆
-                                healthCubes.append("☐")
-                            }
-
-                        }
-                        val shownHealth = healthCubes.toString()
-                        Text(text= "Health: $shownHealth", fontSize = 20.sp)
-                        TextField(
-                            keyboardOptions = KeyboardOptions(
-                                imeAction = ImeAction.Done,
-                                keyboardType = KeyboardType.Number),
-                            value = viewModel.damageDealt.value,
-                            onValueChange = {it ->
-                                if (it.length <= numberMaxLength){
-                                    viewModel.showDamageDealt(it)}
-                                            },
-                            modifier = Modifier.fillMaxWidth().padding(4.dp),
-                            placeholder = {Text("insert damage")})
-                        Row{
+                        val keyboardController = LocalSoftwareKeyboardController.current
+                        val focusManager = LocalFocusManager.current
+                        Box(modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.CenterEnd){
                             Button(
                                 modifier = Modifier.padding(8.dp),
                                 onClick = {
-                                val numberOfTimes = viewModel.damageDealt.value.toIntOrNull() ?: 0
-                                if (numberOfTimes > 0){
-                                    repeat(numberOfTimes){
-                                        increaseBashing()
-                                    }
-                                }
-                                    viewModel.showDamageDealt("")
-                                    keyboardController?.hide()
-                                    focusManager.clearFocus()
-
-                            } ) {
-                                Text("Bashing")
-                            }
-                            Button(
-                                modifier = Modifier.padding(8.dp),
-                                onClick = {
-                                val numberOfTimes = viewModel.damageDealt.value.toIntOrNull() ?: 0
-                                if (numberOfTimes > 0){
-                                    repeat(numberOfTimes){
-                                        increaseLethal()
-                                    }
-                                }
-                                    viewModel.showDamageDealt("")
-                                    keyboardController?.hide()
-                                    focusManager.clearFocus()
-                            } ){
-                                Text("Lethal")
-                            }
-                            Button(
-                                modifier = Modifier.padding(8.dp),
-                                onClick = {
-                                val numberOfTimes = viewModel.damageDealt.value.toIntOrNull() ?: 0
-                                if (numberOfTimes > 0){
-                                    repeat(numberOfTimes){
-                                        increaseAggr()
-                                    }
-                                }
-                                    viewModel.showDamageDealt("")
-                                    keyboardController?.hide()
-                                    focusManager.clearFocus()
-                            } ){
-                                Text("Aggravated")
+                                    viewModel.addedCreaturesList.remove(creature)
+                                    }) {
+                                Text("Delete creature")
                             }
                         }
+                        Text(text = "Name: ${creature.name}", fontSize = 20.sp)
+                        Text(text = "Initiative: ${creature.initiative}", fontSize = 20.sp)
+                        if (creature.health.isEmpty()) {
+                            Text(text = "Health: ", fontSize = 20.sp)
+                        } else {
+                            //impedisce al for loop di ripetersi ogni volta che premi un bottone
+                            if (healthCubes.toString() == "") {
+                                //determina quanti cubi di vita ci sono
+                                for (i in 0 until creature.health.toInt()) {
+                                    //☐
+                                    //☒
+                                    //◫
+                                    //⧆
+                                    healthCubes.append("☐")
+                                }
+
+                            }
+                            val shownHealth = healthCubes.toString()
+                            Text(text = "Health: $shownHealth", fontSize = 20.sp)
+                            TextField(
+                                keyboardOptions = KeyboardOptions(
+                                    imeAction = ImeAction.Done,
+                                    keyboardType = KeyboardType.Number
+                                ),
+                                value = viewModel.damageDealt.value,
+                                onValueChange = { it ->
+                                    if (it.length <= numberMaxLength) {
+                                        viewModel.showDamageDealt(it)
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth().padding(4.dp),
+                                placeholder = { Text("insert damage") })
+                            Row {
+                                Button(
+                                    modifier = Modifier.padding(8.dp),
+                                    onClick = {
+                                        val numberOfTimes =
+                                            viewModel.damageDealt.value.toIntOrNull() ?: 0
+                                        if (numberOfTimes > 0) {
+                                            repeat(numberOfTimes) {
+                                                increaseBashing()
+                                            }
+                                        }
+                                        viewModel.showDamageDealt("")
+                                        keyboardController?.hide()
+                                        focusManager.clearFocus()
+
+                                    }) {
+                                    Text("Bashing")
+                                }
+                                Button(
+                                    modifier = Modifier.padding(8.dp),
+                                    onClick = {
+                                        val numberOfTimes =
+                                            viewModel.damageDealt.value.toIntOrNull() ?: 0
+                                        if (numberOfTimes > 0) {
+                                            repeat(numberOfTimes) {
+                                                increaseLethal()
+                                            }
+                                        }
+                                        viewModel.showDamageDealt("")
+                                        keyboardController?.hide()
+                                        focusManager.clearFocus()
+                                    }) {
+                                    Text("Lethal")
+                                }
+                                Button(
+                                    modifier = Modifier.padding(8.dp),
+                                    onClick = {
+                                        val numberOfTimes =
+                                            viewModel.damageDealt.value.toIntOrNull() ?: 0
+                                        if (numberOfTimes > 0) {
+                                            repeat(numberOfTimes) {
+                                                increaseAggr()
+                                            }
+                                        }
+                                        viewModel.showDamageDealt("")
+                                        keyboardController?.hide()
+                                        focusManager.clearFocus()
+                                    }) {
+                                    Text("Aggravated")
+                                }
+                            }
+                        }
+
+                        HorizontalDivider(thickness = 6.dp)
+
                     }
-
-                    HorizontalDivider(thickness = 6.dp)
-
                 }
             }
 
@@ -411,18 +459,11 @@ open class MainActivity : ComponentActivity() {
                             fontStyle = FontStyle.Italic)
                         AddCreatureButton()
                         //colonna che contiene la lista di creature inserite.
-                        var scrollState = rememberScrollState()
-                        Column (modifier = Modifier
-                            .verticalScroll(scrollState)
-                            .background(Color.White)
-                            .statusBarsPadding()
-                            .navigationBarsPadding()
-                            .fillMaxWidth()){
-                            //nome, iniziativa e salute
-                            damageDealing()
+                        creaturesColumn()
 
-                        }
+
                     }
+
                 }
 
             }
