@@ -179,7 +179,8 @@ open class MainActivity : ComponentActivity() {
                                 id = viewModel.addedCreaturesList.size,
                                 name = viewModel.creatureName.value,
                                 health = viewModel.creatureHealth.value,
-                                initiative = viewModel.creatureInitiative.value
+                                initiative = viewModel.creatureInitiative.value,
+                                currentHealth = viewModel.creatureHealth.value
                             )
                             viewModel.addedCreaturesList.add(newCreature)
                             viewModel.DialogToggled(false)
@@ -220,6 +221,7 @@ open class MainActivity : ComponentActivity() {
                         val updatedHealth = remember { mutableStateOf("") }
                         val healthCubes = StringBuilder(updatedHealth.value)
 
+
                         val numberMaxLength = 3
 
                         fun increaseBashing() {
@@ -238,21 +240,25 @@ open class MainActivity : ComponentActivity() {
                                         healthCubes.toString().indexOf("☒") + 1,
                                         "⧆"
                                     )
+                                    creature.currentHealth = healthCubes.toString()
                                 } else if (!(healthCubes.toString().contains("☐"))) {
                                     healthCubes.replace(
                                         healthCubes.toString().indexOf("◫"),
                                         healthCubes.toString().indexOf("◫") + 1,
                                         "☒"
                                     )
+                                    creature.currentHealth = healthCubes.toString()
                                 } else if ((healthCubes.toString().contains("☐"))) {
                                     healthCubes.replace(
                                         healthCubes.toString().indexOf("☐"),
                                         healthCubes.toString().indexOf("☐") + 1,
                                         "◫"
                                     )
+                                    creature.currentHealth = healthCubes.toString()
                                 }
 
                                 updatedHealth.value = healthCubes.toString()
+                                creature.currentHealth = healthCubes.toString()
                             }
                         }
 
@@ -273,6 +279,7 @@ open class MainActivity : ComponentActivity() {
                                         "⧆"
                                     )
                                     healthCubes.setLength(creature.health.toInt())
+                                    creature.currentHealth = healthCubes.toString()
                                 }
 //
                                 else if ((healthCubes.toString().contains("◫"))) {
@@ -282,6 +289,7 @@ open class MainActivity : ComponentActivity() {
                                         "☒"
                                     )
                                     healthCubes.setLength(creature.health.toInt())
+                                    creature.currentHealth = healthCubes.toString()
                                 } else if ((healthCubes.toString()
                                         .contains("☐")) and !(healthCubes.toString().contains("◫"))
                                 ) {
@@ -292,6 +300,7 @@ open class MainActivity : ComponentActivity() {
                                     )
                                 }
                                 updatedHealth.value = healthCubes.toString()
+                                creature.currentHealth = healthCubes.toString()
                             }
                         }
 
@@ -311,6 +320,7 @@ open class MainActivity : ComponentActivity() {
                                         healthCubes.toString().indexOf("☒") + 1,
                                         "⧆"
                                     )
+                                    creature.currentHealth = healthCubes.toString()
                                 } else if ((healthCubes.toString().contains("☒"))) {
                                     healthCubes.replace(
                                         healthCubes.toString().indexOf("☒"),
@@ -318,6 +328,7 @@ open class MainActivity : ComponentActivity() {
                                         "⧆"
                                     )
                                     healthCubes.setLength(creature.health.toInt())
+                                    creature.currentHealth = healthCubes.toString()
                                 } else if ((healthCubes.toString().contains("◫"))) {
                                     healthCubes.replace(
                                         healthCubes.toString().indexOf("◫"),
@@ -325,6 +336,7 @@ open class MainActivity : ComponentActivity() {
                                         "⧆"
                                     )
                                     healthCubes.setLength(creature.health.toInt())
+                                    creature.currentHealth = healthCubes.toString()
                                 } else if ((healthCubes.toString()
                                         .contains("☐")) and !(healthCubes.toString().contains("◫"))
                                 ) {
@@ -333,9 +345,11 @@ open class MainActivity : ComponentActivity() {
                                         healthCubes.toString().indexOf("☐") + 1,
                                         "⧆"
                                     )
+                                    creature.currentHealth = healthCubes.toString()
                                 }
 
                                 updatedHealth.value = healthCubes.toString()
+                                creature.currentHealth = healthCubes.toString()
                             }
                         }
                         val keyboardController = LocalSoftwareKeyboardController.current
@@ -364,10 +378,11 @@ open class MainActivity : ComponentActivity() {
                                     //◫
                                     //⧆
                                     healthCubes.append("☐")
+
                                 }
 
                             }
-                            val shownHealth = healthCubes.toString()
+                            val shownHealth = creature.currentHealth
                             Text(text = "Health: $shownHealth", fontSize = 20.sp)
                             TextField(
                                 keyboardOptions = KeyboardOptions(
